@@ -1,0 +1,39 @@
+@use 'colors' as *;
+
+:host {
+  width: 100vw;
+  height: 100vh;
+  display: grid;
+  place-items: center;
+}
+
+.container{
+  padding: 20px;
+  width: 50vw;
+  background-color: $background-2;
+
+  input{
+    display: none;
+  }
+
+  .user{
+    background-color: $background;
+    margin-top: 5px;
+    padding: 10px 20px;
+    display: grid;
+    grid-template-columns: 50px 1fr 30px;
+    gap: 5px;
+    cursor: pointer;
+
+    &:hover{
+      background-color: $background-3;
+    }
+
+    button{
+      color: $fonte;
+      font-size: 1em;
+      background-color: transparent;
+      border: 1px solid $fonte;
+    }
+  }
+}

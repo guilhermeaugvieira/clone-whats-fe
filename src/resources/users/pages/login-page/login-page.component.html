@@ -1,0 +1,14 @@
+<div class="container">
+  <p>Escolha um login</p>
+
+  <input type="file" #input/>
+  
+  @for (user of users$ | async; track $index) {
+    
+    <div class="user">
+      <img src="" alt="">
+      <span>{{user.name}}</span>
+      <button type="button" (click)="input.click()">IM</button>
+    </div>
+  }
+</div>
