@@ -1,0 +1,18 @@
+<div class="container">
+  <p>Escolha um login</p>
+
+  <input type="file" #input (change)="onFileSelected($event)"/>
+  
+  @for (userImage of users$ | async; track userImage.user.id) {
+    
+    <div class="user">
+      @if (userImage.imageUrl) {
+        <img [src]="userImage.imageUrl" alt="">
+      } @else {
+        <span>N/A</span>
+      }
+      <span>{{userImage.user.name}}</span>
+      <button type="button" (click)="onImageButtonClicked(userImage.user.id)">IM</button>
+    </div>
+  }
+</div>
