@@ -1,7 +1,9 @@
 import { AsyncPipe } from '@angular/common';
 import { Component, ElementRef, ViewChild, inject } from '@angular/core';
+import { Router } from '@angular/router';
 import { catchError, of } from 'rxjs';
 import { UserService } from '../../services/user.service';
+import { User } from '../../types/user.model';
 
 @Component({
   standalone: true,
@@ -14,6 +16,7 @@ export class LoginPageComponent {
   private inputFile!: ElementRef;
   
   private userService = inject(UserService);
+  private router = inject(Router);
   private lastUserIdClicked = '';
   
   protected users$ = this.userService.getUsers()
@@ -32,7 +35,9 @@ export class LoginPageComponent {
       );
   }
 
-  onImageButtonClicked(userId: string){
+  onImageButtonClicked(event: Event, userId: string){
+    event.stopPropagation();
+    
     this.lastUserIdClicked = userId;
 
     this.inputFile.nativeElement.click();
@@ -54,6 +59,18 @@ export class LoginPageComponent {
       this.userService.uploadUserImage(this.lastUserIdClicked, fileInBytes)
         .subscribe(() => this.refreshUsers());
     };
+  }
+
+  login(user: User){
+    this.userService.login(user.id)
+      .subscribe((res) => {
+        this.userService.setCurrentUser({
+          ...user,
+          token: res.token
+        })
+
+        this.router.navigate(['conversations']);
+      });
   }
 
 }
