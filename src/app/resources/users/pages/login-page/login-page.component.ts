@@ -57,7 +57,10 @@ export class LoginPageComponent {
     reader.onloadend = () => {
       const fileInBytes = reader.result as ArrayBuffer;
       this.userService.uploadUserImage(this.lastUserIdClicked, fileInBytes)
-        .subscribe(() => this.refreshUsers());
+        .subscribe(() => {
+          this.refreshUsers();
+          this.inputFile.nativeElement.value = null;
+        });
     };
   }
 

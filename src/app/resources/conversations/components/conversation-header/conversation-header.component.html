@@ -1,0 +1,11 @@
+<div class="header">
+  <img [src]="userImageUrl$ | async " alt=""/>
+  <span> {{userInfo()!.name}} </span>
+  <button (click)="showModal = true"> + </button>
+</div>
+
+<input type="text" placeholder="Pesquisar...">
+
+@if(showModal){
+  <app-new-conversation-modal [(showModal)]="showModal" />
+}

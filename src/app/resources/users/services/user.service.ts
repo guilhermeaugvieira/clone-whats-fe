@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, effect, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { catchError, forkJoin, map, of, switchMap, tap } from 'rxjs';
-import { LocalDb } from '../../local-db/local-db';
+import { LocalDbService } from '../../local-db/services/local-db.service';
 import { AuthLoginResponse } from '../types/auth-login-response.model';
 import { UserStorageInfo } from '../types/user-storage-info.model';
 import { User } from '../types/user.model';
@@ -15,6 +15,7 @@ export class UserService {
 
   private http = inject(HttpClient);
   private router = inject(Router);
+  private localDb = inject(LocalDbService);
   private urlApi = `${environment.urlApi}`;
   private userInfo = signal<UserStorageInfo | null>(null);
 
@@ -40,7 +41,7 @@ export class UserService {
           return forkJoin(userImageRequests);
         }),
         tap(userImages => {
-          new LocalDb().addUsers(userImages
+          this.localDb.addUsers(userImages
             .map(userImage => ({
               id: userImage.user.id,
               name: userImage.user.name,
@@ -104,6 +105,12 @@ export class UserService {
   logout(){
     this.userInfo.set(null);
     this.router.navigate(['login']);
+  }
+
+  getCurrentUserImageUrl(){
+    return this.localDb.getUserImage(this.userInfo()!.id)
+      .pipe(
+        map(blob => !!blob ? URL.createObjectURL(blob) : ''));
   }
 
 }

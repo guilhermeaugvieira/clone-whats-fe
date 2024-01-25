@@ -1,8 +1,12 @@
+import { Injectable } from "@angular/core";
 import Dexie from "dexie";
-import { from } from "rxjs";
-import { LocalUserImage } from "./types/local-user-image.model";
+import { from, map } from "rxjs";
+import { LocalUserImage } from "../types/local-user-image.model";
 
-export class LocalDb {
+@Injectable({
+  providedIn: 'root'
+})
+export class LocalDbService {
   
   private localDb = new Dexie('whats-local-live');
 
@@ -19,6 +23,12 @@ export class LocalDb {
 
   addUsers(users: LocalUserImage[]){
     return from(this.userTable.bulkPut(users));
+  }
+
+  getUserImage(userId: string){
+    return from(this.userTable.get(userId))
+      .pipe(
+        map(localUserImageBlob => localUserImageBlob?.imageBlob));
   }
 
 }
