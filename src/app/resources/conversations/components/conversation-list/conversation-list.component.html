@@ -1,6 +1,9 @@
 <app-conversation-header/>
 
 <div class="contacts">
-  <app-conversation-contact/>
-  <app-conversation-contact/>
+  
+  @for (conversation of conversations$ | async; track conversation.id) {
+    <app-conversation-contact [conversation]="conversation" (click)="goToUser(conversation.userId)"/>
+  }
+
 </div>

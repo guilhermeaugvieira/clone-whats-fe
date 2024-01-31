@@ -1,4 +1,6 @@
 @use 'colors' as *;
+@use 'default-format' as *;
+
 
 :host {
   position: absolute;
@@ -15,19 +17,53 @@
   padding: 20px;
   background-color: $background;
   width: 400px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
 
-  button{
-    float: right;
-    background-color: transparent;
-    border: 0;
-    cursor: pointer;
-    padding: 10px;
-    font-size: 1.2rem;
-    font-weight: bold;
-    color: $fonte;
+  .modal-header{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
 
-    &:hover{
-      background-color: $background-2;
+    button{
+      display: block;
+      background-color: transparent;
+      border: 0;
+      cursor: pointer;
+      padding: 10px;
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: $fonte;
+  
+      &:hover{
+        background-color: $background-2;
+      }
+    }
+  }
+
+  .conversation-options{
+    width: 100%;
+
+    .user{
+      background-color: $background;
+      margin-top: 5px;
+      padding: 10px 20px;
+      display: grid;
+      grid-template-columns: 50px 1fr;
+      align-items: center;
+      gap: 5px;
+      cursor: pointer;
+    
+      &:hover{
+        background-color: $background-3;
+      }
+    
+      img{
+        @extend .profile-image;
+      }
     }
   }
 }

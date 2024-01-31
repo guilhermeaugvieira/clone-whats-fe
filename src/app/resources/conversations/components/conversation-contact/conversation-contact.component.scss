@@ -1,8 +1,31 @@
+@use 'colors' as *;
+@use 'default-format' as *;
+
 :host {
   display: block;
+}
+
+.container{
+  background-color: $background;
+  margin-top: 5px;
+  padding: 10px 20px;
+  display: grid;
+  grid-template-columns: 50px 1fr;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+
+  &:hover{
+    background-color: $background-3;
+    border: 1px solid $background-3;
+    border-radius: 10px;
+  }
+
+  img{
+    @extend .profile-image;
+  }
 
   span {
     font-size: 1rem;
-    margin-left: 5px;
   }
 }

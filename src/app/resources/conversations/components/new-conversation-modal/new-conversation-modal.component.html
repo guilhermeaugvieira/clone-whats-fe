@@ -1,6 +1,17 @@
-<div class="container">
-  Conteúdo
+<div class="container">  
+  <div class="modal-header">
+    <span> Contatos </span>
+    <button (click)="showModalChange.emit(false)">X</button>
+  </div>
   
-  <button (click)="showModalChange.emit(false)">X</button>
+  <div class="conversation-options">    
+    @for(usr of availableUsers$ | async; track usr.user.id ){
+      <div class="user" (click)="createNewConversation(usr.user)">
+        <img [src]="usr.imageUrl" alt=""/>
+        <span> {{ usr.user.name }} </span>
+      </div>
+    }  
+  </div>
+
 </div>
 

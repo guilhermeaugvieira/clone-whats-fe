@@ -1,11 +1,12 @@
 import { Component, inject } from '@angular/core';
+import { RouterOutlet } from '@angular/router';
 import { UserService } from '../../../users/services/user.service';
 import { ConversationListComponent } from '../../components/conversation-list/conversation-list.component';
 
 @Component({
   selector: 'app-conversation-page',
   standalone: true,
-  imports: [ConversationListComponent],
+  imports: [ConversationListComponent, RouterOutlet],
   templateUrl: './conversation-page.component.html',
   styleUrl: './conversation-page.component.scss'
 })

@@ -9,7 +9,7 @@
 
 .contacts{
   overflow-y: auto;
-  height: calc(80vh - 81px);
+  max-height: calc(80vh - 85px);
 
   &::-webkit-scrollbar{
     width: 8px;
