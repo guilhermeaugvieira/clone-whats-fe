@@ -8,20 +8,20 @@ import { Conversation } from '../types/conversation.model';
 })
 export class ConversationService {
 
-  private _localDb = inject(LocalDbService);
+  private _localDbService = inject(LocalDbService);
 
   createConversation(id: string, userName: string){
-    return this._localDb.addConversation(id, userName);
+    return this._localDbService.addConversation(id, userName);
   }
 
   listenConversations(){
-    return this._localDb.getLiveConversation()
+    return this._localDbService.getLiveConversation()
       .pipe(
         switchMap(conversations => {
           
           const userImageBlobRequests = conversations
             .map(conversation => 
-              this._localDb.getUserImage(conversation.id)
+              this._localDbService.getUserImage(conversation.id)
                 .pipe(
                   map(blob => ({
                     id: conversation.id,
@@ -34,5 +34,18 @@ export class ConversationService {
           return forkJoin(userImageBlobRequests);
         })
       );
+  }
+
+  publishMessage(conversationUserId: string, message: string){
+    return this._localDbService.saveMessage({
+      time: new Date(),
+      message,
+      mine: true,
+      conversationUserId
+    });
+  }
+
+  obtainMessageHistoryFromConversationUserId(conversationUserId: string){
+    return this._localDbService.getMessageHistoryByConversationUserId(conversationUserId);
   }
 }

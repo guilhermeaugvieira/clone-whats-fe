@@ -1,6 +1,7 @@
 import { Injectable } from "@angular/core";
 import Dexie, { liveQuery } from "dexie";
 import { defer, from, map } from "rxjs";
+import { LocalConversationMessage } from "../types/local-conversation-message.model";
 import { LocalConversation } from "../types/local-conversation.model";
 import { LocalUserImage } from "../types/local-user-image.model";
 
@@ -9,21 +10,26 @@ import { LocalUserImage } from "../types/local-user-image.model";
 })
 export class LocalDbService {
   
-  private localDb = new Dexie('whats-local-live');
+  private _localDb = new Dexie('whats-local-live');
 
   private get userTable(){
-    return this.localDb.table<LocalUserImage>('users');
+    return this._localDb.table<LocalUserImage>('users');
   }
 
   private get conversationTable(){
-    return this.localDb.table<LocalConversation>('conversations');
+    return this._localDb.table<LocalConversation>('conversations');
+  }
+
+  private get conversationMessageTable(){
+    return this._localDb.table<LocalConversationMessage>('conversationMessages');
   }
 
   constructor(){
-    this.localDb.version(2)
+    this._localDb.version(3)
       .stores({
         users: '&id, name, imageBlob',
-        conversations: '&id, userName'
+        conversations: '&id, userName',
+        conversationMessages: '++id, conversationUserId, message, mine, time'
       });
   }
 
@@ -53,6 +59,17 @@ export class LocalDbService {
 
   getUserById(userId: string){
     return defer(() => this.userTable.get(userId.toLocaleLowerCase()));
+  }
+
+  saveMessage(message: LocalConversationMessage){
+    return from(this.conversationMessageTable.add(message));
+  }
+
+  getMessageHistoryByConversationUserId(conversationUserId: string){
+    return defer(() => this.conversationMessageTable
+      .where('conversationUserId')
+      .equalsIgnoreCase(conversationUserId)
+      .toArray());
   }
 
 }

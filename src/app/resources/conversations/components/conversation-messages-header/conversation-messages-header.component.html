@@ -1,1 +1,8 @@
-<span> id - nome usuário</span>
+<div class="container">
+  @if (user$ | async; as userImage) {
+    <img [src]="userImage.imageUrl" alt=""/>
+    <span> {{userImage.user.name}} </span>
+  }
+</div>
+
+<div class="divider"></div>

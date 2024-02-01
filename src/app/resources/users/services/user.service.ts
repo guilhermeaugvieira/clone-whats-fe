@@ -14,18 +14,18 @@ import { User } from '../types/user.model';
 })
 export class UserService {
 
-  private http = inject(HttpClient);
-  private router = inject(Router);
-  private localDb = inject(LocalDbService);
-  private urlApi = `${environment.urlApi}`;
-  private userInfo = signal<UserStorageInfo | null>(null);
+  private _localDbService = inject(LocalDbService);
+  private _http = inject(HttpClient);
+  private _router = inject(Router);
+  private _urlApi = `${environment.urlApi}`;
+  private _userInfo = signal<UserStorageInfo | null>(null);
 
   constructor(){
     effect(() => this.syncUserInfoLocalStorage())
   }
 
   getUsers(){
-    return this.http.get<User[]>(`${this.urlApi}/user`)
+    return this._http.get<User[]>(`${this._urlApi}/user`)
       .pipe(
         switchMap(users => {
           
@@ -42,7 +42,7 @@ export class UserService {
           return forkJoin(userImageRequests);
         }),
         tap(userImages => {
-          this.localDb.addUsers(userImages
+          this._localDbService.addUsers(userImages
             .map(userImage => ({
               id: userImage.user.id,
               name: userImage.user.name,
@@ -57,8 +57,8 @@ export class UserService {
   }
 
   private getUserImage(userId: string){
-    return this.http
-      .get(`${this.urlApi}/user/${userId}/image`, { responseType: 'blob' });
+    return this._http
+      .get(`${this._urlApi}/user/${userId}/image`, { responseType: 'blob' });
   }
 
   uploadUserImage(userId: string, image: ArrayBuffer){
@@ -66,30 +66,30 @@ export class UserService {
     const formData = new FormData();
     formData.append('file', blobImage);
 
-    return this.http
-      .put(`${this.urlApi}/user/${userId}/image`, formData);
+    return this._http
+      .put(`${this._urlApi}/user/${userId}/image`, formData);
   }
 
   login(userId: string){
-    return this.http.post<AuthLoginResponse>(`${this.urlApi}/auth`, {
+    return this._http.post<AuthLoginResponse>(`${this._urlApi}/auth`, {
       userId: userId
     });
   }
 
   setCurrentUser(user: UserStorageInfo){
-    this.userInfo.set(user);
+    this._userInfo.set(user);
   }
 
   getUserInfoSignal(){
-    return this.userInfo.asReadonly();
+    return this._userInfo.asReadonly();
   }
 
   syncUserInfoLocalStorage(){
-    localStorage.setItem('UserData', JSON.stringify(this.userInfo()));
+    localStorage.setItem('UserData', JSON.stringify(this._userInfo()));
   }
 
   isUserLogged(){
-    return Boolean(this.userInfo());
+    return Boolean(this._userInfo());
   }
 
   trySyncLocalStorage(){
@@ -100,22 +100,22 @@ export class UserService {
 
     const userData: UserStorageInfo = JSON.parse(localStorageData);
 
-    this.userInfo.set(userData);
+    this._userInfo.set(userData);
   }
 
   logout(){
-    this.userInfo.set(null);
-    this.router.navigate(['login']);
+    this._userInfo.set(null);
+    this._router.navigate(['login']);
   }
 
   getCurrentUserImageUrl(){
-    return this.localDb.getUserImage(this.userInfo()!.id)
+    return this._localDbService.getUserImage(this._userInfo()!.id)
       .pipe(
         map(blob => !!blob ? URL.createObjectURL(blob) : ''));
   }
 
   getLocalUsers(){
-    return this.localDb.getUsers()
+    return this._localDbService.getUsers()
       .pipe(
         map((localUsers) => localUsers.map<UserImage>(localUser => ({
           user: {
@@ -126,5 +126,19 @@ export class UserService {
         })))
       )
   }
+
+  getLocalUserById(userId: string){
+    return this._localDbService.getUserById(userId)
+      .pipe(
+        map(userInfo => ({
+          user: {
+            id: userId,
+            name: userInfo!.name,
+          },
+          imageUrl: !!userInfo!.imageBlob ? URL.createObjectURL(userInfo!.imageBlob) : null
+        } as UserImage)
+        )
+      )
+  };
 
 }

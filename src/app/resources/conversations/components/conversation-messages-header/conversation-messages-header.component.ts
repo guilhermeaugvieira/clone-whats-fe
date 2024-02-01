@@ -2,8 +2,7 @@ import { AsyncPipe } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { map, switchMap } from 'rxjs';
-import { LocalDbService } from '../../../local-db/services/local-db.service';
-import { Conversation } from '../../types/conversation.model';
+import { UserService } from '../../../users/services/user.service';
 
 @Component({
   selector: 'app-conversation-messages-header',
@@ -15,24 +14,12 @@ import { Conversation } from '../../types/conversation.model';
 export class ConversationMessagesHeaderComponent {
 
   private _activatedRoute = inject(ActivatedRoute);
-  private _localDb = inject(LocalDbService);
+  private _userService = inject(UserService);
 
   protected user$ = this._activatedRoute.paramMap
     .pipe(
-      map(value => value.get('userId')),
-      switchMap(userId => {
-        const userData = this._localDb.getUserById(userId!)
-          .pipe(
-            map(userInfo => ({
-              id: userId,
-              userId: userId,
-              userName: userInfo!.name,
-              userImageUrl: userInfo!.imageBlob ? URL.createObjectURL(userInfo!.imageBlob) : null
-            } as Conversation))            
-          )
-
-        return userData;
-      })
+      map(param => param.get('userId')),
+      switchMap(userId => this._userService.getLocalUserById(userId!))
     );
 
 }

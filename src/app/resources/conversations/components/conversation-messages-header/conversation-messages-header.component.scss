@@ -1,4 +1,32 @@
+@use 'default-format' as *;
+@use 'colors' as *;
+
 :host {
   display: block;
   height: 100%;
 }
+
+.container{
+  display: flex;
+  min-width: 100%;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 5px;
+  
+  img{
+    @extend .profile-image;
+  }
+  
+  span {
+    font-size: 1.2rem;
+    width: 100%;
+  }
+}
+
+.divider{
+  width: 100%;
+  height: .5px;
+  background-color: $background;
+  margin-top: 5px;
+}
+

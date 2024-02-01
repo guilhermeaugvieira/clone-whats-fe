@@ -1,0 +1,12 @@
+<div class="container" [class.is-mine]="message.mine">
+  <div class="balloon">
+    <div class="message">
+      <span> {{ message.message }} </span>
+    </div>
+    
+    <div class="time">
+      {{ message.time | date: 'hh:mm a' }}
+    </div>
+  </div>
+  
+</div>
