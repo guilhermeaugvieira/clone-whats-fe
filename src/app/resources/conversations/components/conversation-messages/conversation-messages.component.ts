@@ -1,8 +1,9 @@
 import { AfterViewInit, Component, ElementRef, OnDestroy, QueryList, ViewChild, ViewChildren, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { Subject, filter, map, take, takeUntil } from 'rxjs';
+import { Subject, Subscription, filter, map, take, takeUntil } from 'rxjs';
 import { LocalConversationMessage } from '../../../local-db/types/local-conversation-message.model';
+import { ConversationHubService } from '../../services/conversation-hub.service';
 import { ConversationService } from '../../services/conversation.service';
 import { MessageComponent } from '../message/message.component';
 
@@ -11,7 +12,7 @@ import { MessageComponent } from '../message/message.component';
   standalone: true,
   imports: [MessageComponent, FormsModule],
   templateUrl: './conversation-messages.component.html',
-  styleUrl: './conversation-messages.component.scss'
+  styleUrl: './conversation-messages.component.scss',
 })
 export class ConversationMessagesComponent implements OnDestroy, AfterViewInit {
   @ViewChildren(MessageComponent) messageComponents!: QueryList<MessageComponent>;
@@ -20,6 +21,8 @@ export class ConversationMessagesComponent implements OnDestroy, AfterViewInit {
   private _conversationService = inject(ConversationService);
   private _unsub$ = new Subject<boolean>();
   private _conversationUserId = '';
+  private _conversationHubService = inject(ConversationHubService);
+  private _lastSubMessage = new Subscription();
   
   protected messages : LocalConversationMessage[] = [];
   protected inputMessage = '';
@@ -33,12 +36,25 @@ export class ConversationMessagesComponent implements OnDestroy, AfterViewInit {
       ).subscribe(userId => {
         this._conversationUserId = userId || '';
         
-        this._conversationService.obtainMessageHistoryFromConversationUserId(userId!)
-          .pipe(
-            take(1),
-          ).subscribe(storedMessages => {
-            this.messages = storedMessages;
-          })
+        this.loadMessageHistory();
+        this.refreshMessageListener();
+      });
+  }
+
+  refreshMessageListener(){
+    this._lastSubMessage.unsubscribe();
+    
+    this._lastSubMessage = this._conversationHubService.listenMessagesReceived(this._conversationUserId)
+      .subscribe(localMessage => {
+        this.messages.push(localMessage);
+      })
+  }
+
+  loadMessageHistory(){
+    this._conversationService.obtainMessageHistoryFromConversationUserId(this._conversationUserId!)
+      .pipe(take(1))
+      .subscribe(storedMessages => {
+        this.messages = storedMessages;
       });
   }
 
@@ -53,7 +69,7 @@ export class ConversationMessagesComponent implements OnDestroy, AfterViewInit {
       conversationUserId: this._conversationUserId,
     });
 
-    this._conversationService.publishMessage(this._conversationUserId, this.inputMessage);
+    this._conversationHubService.publishMessage(this._conversationUserId, this.inputMessage);
 
     this.inputMessage = '';
   }
@@ -66,15 +82,14 @@ export class ConversationMessagesComponent implements OnDestroy, AfterViewInit {
 
   ngAfterViewInit(): void {
     this.messageComponents.changes
-      .pipe(
-        takeUntil(this._unsub$)
-      )
+      .pipe(takeUntil(this._unsub$))
       .subscribe(() => this.scrollToLast());
   }
   
   ngOnDestroy(): void {
     this._unsub$.next(true);
     this._unsub$.complete();
+    this._conversationHubService.stopHubConnection();
   }
 
 }

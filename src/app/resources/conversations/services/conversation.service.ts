@@ -36,15 +36,6 @@ export class ConversationService {
       );
   }
 
-  publishMessage(conversationUserId: string, message: string){
-    return this._localDbService.saveMessage({
-      time: new Date(),
-      message,
-      mine: true,
-      conversationUserId
-    });
-  }
-
   obtainMessageHistoryFromConversationUserId(conversationUserId: string){
     return this._localDbService.getMessageHistoryByConversationUserId(conversationUserId);
   }
